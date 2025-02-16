@@ -2,6 +2,7 @@ import asyncio
 import os
 import serial
 import time
+import subprocess
 from googletrans import Translator
 from faster_whisper import WhisperModel
 from gtts import gTTS
@@ -56,6 +57,16 @@ async def main():
             segments, _ = model.transcribe(FILE_NAME, beam_size=5)
             transcription = " ".join(segment.text for segment in segments)
             translated_text = await google_translator.translate(transcription, dest="en")
+
+            tts = gTTS(translated_text.text, lang='en')
+            tts.save("raw_tts.wav")
+            subprocess.run([
+                'ffmpeg', '-i', 'raw_tts.wav',
+                '-ar', '16000',
+                '-ac', '1',
+                '-c:a', 'pcm_u8',
+                'tts.wav'
+            ], check=True)
             print(translated_text.text)
 
             print("[INFO] Transcription complete!")
