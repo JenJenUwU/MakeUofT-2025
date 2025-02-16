@@ -8,8 +8,10 @@
 #define BUTTON_PIN 2          // Push Button Pin
 
 TMRpcm audio;
+TMRpcm music;
 bool recmode = false;
 const char* filename = "output.wav";  // Always write to this file
+const char* tts = "tts.wav";
 unsigned long lastButtonPress = 0;    // Timestamp for debounce delay
 File audioFile;
 
@@ -18,6 +20,9 @@ void setup() {
     pinMode(AUDIO_INPUT, INPUT);
     pinMode(LED_PIN, OUTPUT);
     pinMode(BUTTON_PIN, INPUT_PULLUP);
+    music.speakerPin = 9;
+    music.setVolume(5);
+    music.quality(1);
     attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), button, FALLING);
 
     // Initialize SD Card
@@ -76,6 +81,7 @@ void button() {
         audio.stopRecording(filename);
         Serial.println("Recording Stopped!");
 
+        music.play("tts.wav");
         // Automatically send the file over Serial
         sendWavFile(filename);
     }
